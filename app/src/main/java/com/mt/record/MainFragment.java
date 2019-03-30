@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,12 +34,12 @@ import java.util.List;
 public class MainFragment extends Fragment implements View.OnClickListener {
 
     private static final int TOTAL_TIME = 2 * 60; // 单位：秒
-    SeekBar seekBar;
     Button playRecord;
     android.support.design.widget.FloatingActionButton record;
     Button repeatRecord;
     Button saveRecord;
     Chronometer recordTimer;
+    TextView pauseTV;
     private RecorderManager recordManager; // 录制音频
     private boolean isRecording = false; // 录音中的标志位
     private long recordTime; // 用于记录计时暂停时的 SystemClock.elapsedRealTime();
@@ -57,19 +58,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        seekBar = view.findViewById(R.id.record_sb);
         playRecord = view.findViewById(R.id.record_play);
         record = view.findViewById(R.id.record_goon);
         repeatRecord = view.findViewById(R.id.record_reset);
         saveRecord = view.findViewById(R.id.record_save);
         recordTimer = view.findViewById(R.id.timer);
-
+        pauseTV = view.findViewById(R.id.pause);
         playRecord.setOnClickListener(this);
         record.setOnClickListener(this);
         repeatRecord.setOnClickListener(this);
         saveRecord.setOnClickListener(this);
 
-        enableButton(false, playRecord, seekBar, repeatRecord, saveRecord, record);
+        enableButton(false, playRecord, repeatRecord, saveRecord, record);
 
         audioDir = FileUtils.getAppRecordDir(getContext()).getAbsolutePath();
         recordManager = RecorderManager.getInstance(audioDir);
@@ -87,7 +87,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }
 
                 recordTimer.stop();
-                seekBar.setProgress(100);
                 enableButton(false, record);
 
                 return;
@@ -176,7 +175,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     resetTimer();
                     enableButton(false, playRecord, saveRecord);
                     enableButton(true, record);
-                    seekBar.setProgress(0);
                 })
                 .setNegativeButton(getString(R.string.cancel_text), null)
                 .create()
@@ -237,7 +235,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }, mp -> {
             MediaManager.release();
 
-            seekBar.setProgress(100);
             pauseTimer();
             enableButton(true, record, repeatRecord, saveRecord, playRecord);
 
@@ -327,16 +324,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     private void setRecordBtn(boolean isRecording) {
         if (isRecording) {
+            pauseTV.setVisibility(View.INVISIBLE);
             record.setImageResource((R.mipmap.ic_shortcut_pause));
         } else {
+            pauseTV.setVisibility(View.VISIBLE);
             record.setImageResource((R.mipmap.ic_shortcut_rec));
         }
     }
 
     private void setSeekProgress(int totalDuration) {
         int progress = (int) (((float) timerDuration() / totalDuration) * 100);
-
-        seekBar.setProgress(progress);
 
         if (progress >= 100) {
             recordTimer.stop();
