@@ -1,16 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
               android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:keepScreenOn="true">
 
+    <RelativeLayout
+        android:id="@+id/record_wave"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.cokus.wavelibrary.view.WaveSurfaceView
+            android:id="@+id/wavesfv"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"/>
+
+        <com.cokus.wavelibrary.view.WaveformView
+            android:id="@+id/waveview"
+            android:visibility="invisible"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp" />
+
+    </RelativeLayout>
+
 
     <LinearLayout
+        android:id="@+id/record_control"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:orientation="vertical">
-
 
          <Chronometer
             android:layout_gravity="center"
@@ -80,4 +99,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

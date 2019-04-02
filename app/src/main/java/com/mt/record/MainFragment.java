@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,10 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.cokus.wavelibrary.draw.WaveCanvas;
+import com.cokus.wavelibrary.view.WaveSurfaceView;
+import com.cokus.wavelibrary.view.WaveformView;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,6 +45,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     Button saveRecord;
     Chronometer recordTimer;
     TextView pauseTV;
+    WaveSurfaceView waveSfv;
+    WaveformView waveView;
+    private WaveCanvas waveCanvas;
+
     private RecorderManager recordManager; // 录制音频
     private boolean isRecording = false; // 录音中的标志位
     private long recordTime; // 用于记录计时暂停时的 SystemClock.elapsedRealTime();
@@ -64,6 +73,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         saveRecord = view.findViewById(R.id.record_save);
         recordTimer = view.findViewById(R.id.timer);
         pauseTV = view.findViewById(R.id.pause);
+        waveSfv = view.findViewById(R.id.wavesfv);
+        waveView = view.findViewById(R.id.waveview);
+
+        if(waveSfv != null) {
+            waveSfv.setLine_off(42);
+            //解决surfaceView黑色闪动效果
+            waveSfv.setZOrderOnTop(true);
+            waveSfv.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        }
+        waveView.setLine_offset(42);
+
         playRecord.setOnClickListener(this);
         record.setOnClickListener(this);
         repeatRecord.setOnClickListener(this);
@@ -205,7 +225,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             setRecordBtn(true);
             isRecording = true;
             enableButton(false, repeatRecord, saveRecord, saveRecord);
+            startAudio();
         }
+    }
+
+    /**
+     * 开始录音
+     */
+    private void startAudio(){
+        waveCanvas = new WaveCanvas();
+        waveCanvas.baseLine = waveSfv.getHeight() / 2;
+        waveCanvas.Start(recordManager.getAudioPath(), 8000, waveSfv, recordManager.getAudioPath(), U.DATA_DIRECTORY, new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                return true;
+            }
+        });
     }
 
     /**
